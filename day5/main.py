@@ -15,55 +15,21 @@ sys.path.append('../')
 from utils import *
 
 
-class Rule:
-    def __init__(self, val):
-        self.val = val
-        self.bigger = []
-        self.smaller = []
-
-    def big(self, big):
-        self.bigger.append(big)
-
-    def small(self, small):
-        self.smaller.append(small)
-    
-    def same(self, val):
-        return val == self.val
-
-    def knows(self, val):
-        if val in self.bigger:
-            return 1
-        if val in self.smaller:
-            return -1
-        return 0
-
-    def __str__(self):
-        return str(self.smaller) + " <<< " + str(self.val) + " <<< " + str(self.bigger)
-
-    def __repr__(self):
-        return self.__str__()
-
-
 def createRules(rules):
     newRules = {}
     for ll in lines(rules):
         l, r = ints(ll, "|")
-        if l not in newRules:
-            newRules[l] = Rule(l)
-        newRules[l].big(r)
-        if r not in newRules:
-            newRules[r] = Rule(r)
-        newRules[r].small(l)
+        newRules[(r, l)] = True
+        newRules[(l, r)] = False
     return newRules
 
 
 def isInOrder(d, rules):
     for a in range(len(d)):
-        for b in range(a, len(d)):
+        for b in range(a+1, len(d)):
             if d[a] == d[b]:
                 continue
-            rel = rules[d[a]].knows(d[b])
-            if rel < 0:
+            if rules[(d[a], d[b])]:
                 return False
 
     return True
@@ -77,12 +43,12 @@ def order(d, rules):
             for b in range(a, len(d)):
                 if d[a] == d[b]:
                     continue
-                rel = rules[d[a]].knows(d[b])
-                if rel < 0:
+                if rules[(d[a], d[b])]:
                     d[a], d[b] = d[b], d[a]
                     change = True
 
     return d
+
 
 def s(d, part):
     rules, data = d.split("\n\n")
