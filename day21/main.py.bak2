@@ -1,0 +1,110 @@
+import sys
+import collections
+import datetime
+import itertools as it
+import functools
+import math
+from operator import itemgetter as ig
+import pprint as pp
+import re
+# import bisect
+# import heapq
+# sys.setrecursionlimit(1000000)
+ 
+sys.path.append('../')
+from utils import *
+
+
+def possiblePaths(ipt, kp):
+    paths = []
+
+    cur = kp.index("A")
+    for i in ipt:
+        t = kp.index(i)
+    
+        left = (cur % 3) - (t % 3)
+        up = (cur // 3) - (t // 3)
+        
+        moves = ""
+        if up > 0:
+            moves += "^" * up
+        if up < 0:
+            moves += "v" * -up
+        if left > 0:
+            moves += "<" * left
+        if left < 0:
+            moves += ">" * -left
+        
+        pathPart = list(set("".join(x) + "A" for x in it.permutations(moves)))
+        validParts = []
+
+        for p in pathPart:
+            cur2 = cur
+            isValid = True
+            for c in p:
+                if c == "<":
+                    cur2 -= 1
+                elif c == ">":
+                    cur2 += 1
+                elif c == "^":
+                    cur2 -= 3
+                elif c == "v":
+                    cur2 += 3
+
+                if cur2 == kp.index("_"):
+                    isValid = False
+            if isValid:
+                validParts.append(p)
+
+        paths.append(validParts)
+        cur = t
+
+    return ["".join(x) for x in it.product(*paths)]
+
+
+def s(d, part):
+    kp1 = "789456123_0A"
+    kp2 = "_^A<v>"
+    
+    total = 0
+    ll = lines(d)
+    for line in ll:
+        cx = possiblePaths(line, kp1)
+        amount = 2
+        if part == 2:
+            amount = 25
+        for i in range(amount):
+            print(i)
+            cy = []
+            for c in cx:
+                cy.extend(possiblePaths(c, kp2))
+            cx = cy
+        l = min([len(x) for x in cx])
+        total += int(line[:-1]) * l
+
+    return total
+
+
+def main():
+    if test():
+        file = inp(os.path.join(os.path.dirname(__file__), 'input.txt'))
+        solutions = (s(file, 1), s(file, 2))
+        print("\n\n" + BColors.HEADER + "Solutions" + BColors.ENDC)
+        for sol in solutions:
+            print(sol)
+    else:
+        print("\n\n" + BColors.FAIL + "Not All Test Successful" + BColors.ENDC)
+
+
+def test():
+    example = """029A
+980A
+179A
+456A
+379A"""
+    a1 = 126384
+    a2 = None
+    return validate_solution((s(example, 1), s(example, 2)), (a1, a2))
+
+
+main()

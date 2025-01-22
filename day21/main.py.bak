@@ -1,0 +1,88 @@
+import sys
+import collections
+import datetime
+import itertools
+import functools
+import math
+from operator import itemgetter as ig
+import pprint as pp
+import re
+# import bisect
+# import heapq
+# sys.setrecursionlimit(1000000)
+ 
+sys.path.append('../')
+from utils import *
+
+
+def translateCode(ipt, kp):
+    # PANIC OVER GAP!
+    # OHHHH! MASSIVE ISSUE! Swapping directions could make things shorter in subsequent interpretatations
+    output = ""
+
+    cur = kp.index("A")
+    for i in ipt:
+        t = kp.index(i)
+        # gap = kp.index("_")
+    
+        left = (cur % 3) - (t % 3)
+        right = (t % 3) - (cur % 3)
+        up = (cur // 3) - (t // 3)
+        down = (t // 3) - (cur // 3)
+        
+        if up > 0:
+            output += "^" * up
+        if down > 0:
+            output += "v" * down
+        if left > 0:
+            output += "<" * left
+        if right > 0:
+            output += ">" * right
+        output += "A"
+        cur = t
+
+    return output
+
+
+def s(d, part):
+    if part == 2:
+        return 0
+    
+    kp1 = "789456123_0A"
+    kp2 = "_^A<v>"
+    
+    total = 0
+    ll = lines(d)
+    for line in ll:
+        c1 = translateCode(line, kp1)
+        c2 = translateCode(c1, kp2)
+        c3 = translateCode(c2, kp2)
+        print(line, c1, c2, c3, len(c3))
+        total += int(line[:-1]) * len(c3)
+
+    return total
+
+
+def main():
+    if test():
+        file = inp(os.path.join(os.path.dirname(__file__), 'input.txt'))
+        solutions = (s(file, 1), s(file, 2))
+        print("\n\n" + BColors.HEADER + "Solutions" + BColors.ENDC)
+        for sol in solutions:
+            print(sol)
+    else:
+        print("\n\n" + BColors.FAIL + "Not All Test Successful" + BColors.ENDC)
+
+
+def test():
+    example = """029A
+980A
+179A
+456A
+379A"""
+    a1 = 126384
+    a2 = None
+    return validate_solution((s(example, 1), s(example, 2)), (a1, a2))
+
+
+main()
